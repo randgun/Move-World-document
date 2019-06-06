@@ -1,7 +1,7 @@
 #include<iostream>
 using namespace std;
 
-int main(argv*,argc){
+int main(int argc, char argv*){
 
   cout<<"hello github"<<endl;
   return 0;
