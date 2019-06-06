@@ -1,12 +1,12 @@
-           Ubuntu 14.04 升级至 Ubuntu 16.04 过程及问题解决
+                                Ubuntu 14.04 升级至 Ubuntu 16.04 过程及问题解决
 
-	由于ROS系统支持Ubuntu14.04的Indigo版本即将在2019年4月停止服务，而新的Kinetic版本支持Ubuntu16.04,所以选择升级系统。
-	1.在升级系统前在Terminal执行如下命令安装最新的内核和软件包：
-	$ sudo apt-get update 
-	$ sudo apt-get dist-upgrade
-	在更新软件时发现更新速度过慢，更改镜像源成阿里云镜像，命令如下：
-	$ sudo vim /etc/apt/sources.list
-	编辑
+由于ROS系统支持Ubuntu14.04的Indigo版本即将在2019年4月停止服务，而新的Kinetic版本支持Ubuntu16.04,所以选择升级系统。
+1.在升级系统前在Terminal执行如下命令安装最新的内核和软件包：
+$ sudo apt-get update 
+$ sudo apt-get dist-upgrade
+在更新软件时发现更新速度过慢，更改镜像源成阿里云镜像，命令如下：
+$ sudo vim /etc/apt/sources.list
+编辑
 deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
@@ -20,15 +20,17 @@ deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted unive
 
 （p.s. 执行sudo cp /etc/apt/sources.list /etc/apt/sources.list.bakcup可备份之前的源）
 
-	2.重启系统完成安装
-	$ sudo reboot
+2.重启系统完成安装
+$ sudo reboot
 	
-	3.执行如下命令打开更新管理器
-	$ sudo update-manager -d
+3.执行如下命令打开更新管理器
+$ sudo update-manager -d
 
-	4.之后的步骤选择升级即可，等待安装完成后，重启系统，升级完成
+4.之后的步骤选择升级即可，等待安装完成后，重启系统，升级完成
 
-	一般情况执行上述步骤就完成升级了，然而我当时升级完之后管理员帐号登陆不了界面且出现登陆桌面放大的情况，可能是安装不同的桌面环境后系统混乱了，我尝试过如下解决方法。
+一般情况执行上述步骤就完成升级了，然而我当时升级完之后管理员帐号登陆不了界面且出现登陆桌面放大的情况，
+可能是安装不同的桌面环境后系统混乱了，我尝试过如下解决方法。
+
 方法一：
 1.卸载原来NVIDIA的所有驱动
 	1.1进入文本模式tty1 : CTRL+ALT+F
@@ -66,6 +68,6 @@ $ sudo apt-get automove –purge xfce4-panel xfce4-session xfdesktop4 thunar xfc
 
 或者Xfce $ sudo apt-get install xubuntu-desktop
 
-亦或是某大佬推荐的MATE $ sudo apt-get install ubuntu-mate-desktop
+亦或是某国外大佬推荐的MATE $ sudo apt-get install ubuntu-mate-desktop
 
-最后，当且仅当你尝试了上述方法后问题仍然没有解决，可以尝试重装Ubuntu,尽可能小心。
+最后，当且仅当你尝试了上述方法后问题仍然没有解决，可以尝试重装Ubuntu,不过要尽可能小心。
