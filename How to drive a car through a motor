@@ -1,0 +1,35 @@
+想要驱动小车，就得通过设置IO口输出的PWM占空比来控制四个直流减速电机正转或者反转或者停止，占空比越大，转速越快。
+stm官方提供了很多库函数源码文件，而控制小车主要要使用的就是“stm32f10x_rcc.h”以及“stm32f10x_gpio.h”以及“stm32f10x_tim.h”等头文件。
+首先，通过《STM32 中文参考手册 V10》查找哪些定时器可以用来产生PWM输出，然后找到可以复用为对应定时器输出通道的IO口。
+选择想要使用的定时器以及对应的IO口，然后通过“RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE)”函数使能定时器时钟，
+通过“RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE)”函数使能复用时钟，
+通过“GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP”将对应的IO口设置为复用推挽输出，
+此时便可通过设置定时器的ARR和PSC寄存器值来控制输出PWM的周期：
+TIM_TimeBaseStructure.TIM_Period = arr; //设置自动重装载值
+TIM_TimeBaseStructure.TIM_Prescaler =psc; //设置预分频值
+TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
+TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; //向上计数模式
+TIM_TimeBaseInit(TIMx, &TIM_TimeBaseStructure); //根据指定的参数初始化 TIMx 的
+接着要通过“TIM_OCxInit()”设置对应定时器的相关输出通道为PWM模式
+具体方法为：
+typedef struct
+{
+uint16_t TIM_OCMode;
+uint16_t TIM_OutputState;
+uint16_t TIM_OutputNState; 
+uint16_t TIM_Pulse;
+uint16_t TIM_OCPolarity;
+uint16_t TIM_OCNPolarity;
+uint16_t TIM_OCIdleState;
+uint16_t TIM_OCNIdleState;
+} TIM_OCInitTypeDef;
+TIM_OCInitTypeDef TIM_OCInitStructure;
+TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; //选择 PWM 模式 1
+TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; //比较输出使能
+TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; //输出极性高
+TIM_OCxInit(TIMx, &TIM_OCInitStructure); //初始化 TIMx OCx
+然后是通过“TIM_Cmd(TIMx, ENABLE)”使能对应的定时器
+通过“void TIM_SetComparex(TIM_TypeDef* TIMx,  uint16_t Comparex)”控制对应输出通道输出PWM的占空比，从而控制电机的转速。
+#define  LeftMotorPWM(Speed)	TIM_SetComparex(TIMx, Speed);
+#define  RightMotorPWM(Speed)	TIM_SetComparex(TIMx, Speed);
+最后便可通过“LeftMotorPWM(Speed)；RightMotorPWM(Speed)；”控制小车前进速度。
