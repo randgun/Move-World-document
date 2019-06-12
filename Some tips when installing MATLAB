@@ -26,19 +26,18 @@ g - 所有者所在的组群
 o - 其他人(不是所有者或所有者的组群)
 a - 每个人或全部(u, g, o)
 
-1. 查看文件/文件夹权限
-ls -l filename  # 查看文件权限
-ls -ld folder   # 查看文件夹权限
-输出结果如：
+    4.1 查看文件/文件夹权限	
+    ls -l filename  # 查看文件权限
+    ls -ld folder   # 查看文件夹权限
+    输出结果如：
 
-drwxrwxrwx
-d - 文件夹(- - 文件， l - 链接)
+    drwxrwxrwx
+    d - 文件夹(- - 文件， l - 链接)
 
-rwx - r读/w写/x执行
+    rwx - r读/w写/x执行
 
-九位字母，依次每三个为一组，依次分别为 User、Group、Other的权限.
-
-r=4，w=2，x=1. 如，rwx - 4+2+1=7； rw- - 4+2=6； r-x - 4+1=5.
+    九位字母，依次每三个为一组，依次分别为 User、Group、Other的权限.
+    r=4，w=2，x=1. 如，rwx - 4+2+1=7； rw- - 4+2=6； r-x - 4+1=5.
 
 常用的文件权限：
 
@@ -50,47 +49,47 @@ r=4，w=2，x=1. 如，rwx - 4+2+1=7； rw- - 4+2=6； r-x - 4+1=5.
 744 drwxr--r--
 755 drwxr-xr-x
 777 drwxrwxrwx
+
 owner/group/others)各自的权限(r/w/x)分数是需要累加的，如,当权限为 -rwxrwx--- 即：
 
 owner = rwx = 4+2+1 = 7
-
 group = rwx = 4+2+1 = 7
-
 others= --- = 0+0+0 = 0
 
-2. 修改权限 chmod
+    4.2 修改权限 chmod
 
-chmod [-R] 权限 filename/folder
--R 表示递归(recursive)变更目录及子目录和文件的权限.
+    chmod [-R] 权限 filename/folder
+    -R 表示递归(recursive)变更目录及子目录和文件的权限.
 
-如：  chmod -R 777 filename
+    如：  chmod -R 777 filename
 
-另一种修改权限的方法是：
+    另一种修改权限的方法是：
 
-chmod [u/g/o/a] [+加入/-减去/=设定] [r/w/x] filename/folder 
-3 修改文件的用户名/用户组
-chown [-R] 用户名:用户组名 filename/folders
--R - 递归修改路径下所有子路径和文件的用户组.
+    chmod [u/g/o/a] [+加入/-减去/=设定] [r/w/x] filename/folder 
+    
+    4.3 修改文件的用户名/用户组
+    chown [-R] 用户名:用户组名 filename/folders
+    -R - 递归修改路径下所有子路径和文件的用户组.
 
-如： chown -R root:root /data/
+    如： chown -R root:root /data/
 
 5.matlab创建快捷方式
 
-5.1 先将图标图片放在/usr/local/MATLAB目录下
+    5.1 先将图标图片放在/usr/local/MATLAB目录下
 
-5.2 sudo gedit /usr/share/applications/Matlab.desktop
+    5.2 sudo gedit /usr/share/applications/Matlab.desktop
 
-5.3 写入以下内容
+    5.3 写入以下内容
 
-[Desktop Entry]
-Type=Application
-Name=Matlab
-GenericName=Matlab 2016b
-Comment=Matlab:The Language of Technical Computing
-Exec=sh /usr/local/MATLAB/R2016b/bin/matlab -desktop
-Icon=/usr/local/MATLAB/Matlab.png
-Terminal=false
-Categories=Development;
-Matlab;
+    [Desktop Entry]
+    Type=Application
+    Name=Matlab
+    GenericName=Matlab 2016b
+    Comment=Matlab:The Language of Technical Computing
+    Exec=sh /usr/local/MATLAB/R2016b/bin/matlab -desktop
+    Icon=/usr/local/MATLAB/Matlab.png
+    Terminal=false
+    Categories=Development;
+    Matlab;
 
 
