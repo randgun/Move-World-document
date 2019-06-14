@@ -1,0 +1,52 @@
+解决matlab的警告: MATLAB 先前因底层图形错误而崩溃
+
+问题描述：可能由于之前运行matlab时出现奇异值仍强行计算, 之后在绘图时出现了matlab警告：
+         MATLAB 已通过改用 OpenGL 软件禁用了某些高级的图形渲染。出来的图形效果是锯齿现象比较严重。
+         
+在matlab命令窗口键入 opengl info，发现使用了软件渲染，硬件支持等级写的时none(已知的图形驱动程序有问题)。
+> > opengl info
+                          Version: '1.1.0'
+                           Vendor: 'Microsoft Corporation'
+                         Renderer: 'GDI Generic'
+                   MaxTextureSize: 1024
+                           Visual: '视觉效果 0xc6，(RGB 24 位(8 8 8)、Z 深度 16 位、软件、单缓冲区、消除锯齿 0 次采样)'
+                         Software: 'true'
+             HardwareSupportLevel: 'none'
+        SupportsGraphicsSmoothing: 0
+    SupportsDepthPeelTransparency: 0
+       SupportsAlignVertexCenters: 0
+                       Extensions: {3×1 cell}
+               MaxFrameBufferSize: 0
+               
+解决方法：各种OpenGL实现切换方式为：opengl hardwarebasic， opengl software， opengl hardware). 将OpenGL实现改为基本软件加速
+
+> > opengl hardwarebasic 
+
+再次查看OpenGL信息，显示：
+                          Version: '4.6.0 NVIDIA 419.72'
+                           Vendor: 'NVIDIA Corporation'
+                         Renderer: 'GeForce MX150/PCIe/SSE2'
+            RendererDriverVersion: '25.21.14.1972'
+        RendererDriverReleaseDate: '2019-03-18'
+                   MaxTextureSize: 32768
+                           Visual: '视觉效果 0x09，(RGBA 32 位(8 8 8 8)、Z 深度 16 位、硬件加速、双缓冲区、消除锯齿 8 次采样)'
+                         Software: 'false'
+             HardwareSupportLevel: 'basic'
+        SupportsGraphicsSmoothing: 1
+    SupportsDepthPeelTransparency: 0
+       SupportsAlignVertexCenters: 0
+                       Extensions: {380×1 cell}
+               MaxFrameBufferSize: 32768
+
+这时已经修改好了，不过这只对本次有效（重启matlab后无效），保存设置，对以后matlab启动均有效
+
+> > opengl('save','hardwarebasic')
+
+    重启matlab
+
+
+
+
+
+
+
