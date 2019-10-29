@@ -1,4 +1,4 @@
-Ubuntu 16.04 安装matlab 遇到的问题
+                                         Ubuntu 16.04 安装matlab 遇到的问题
 
 1.由于当时安装激活时选择的是hydrogen用户，所以打开时不能sudo matlab,会遇到错误提示：
 	Your username does not match the username in the license file. 
