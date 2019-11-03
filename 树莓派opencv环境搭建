@@ -1,0 +1,67 @@
+                                                树莓派opencv环境搭建
+                                                
+由于项目需要，我们需要把一个导入了opencv的python程序在树莓派上运行，于是便开始在树莓派上搭建各种环境。
+1、首先是安装ubuntu18.04系统for arm，去官网下载所需版本，地址如下
+https://ubuntu-mate.org/download/
+
+2、下载了.img镜像文件后，用SDFomatter软件格式化SD卡，再通过Win32DiskImager软件写入SD卡中。系统安装过程很简单，就跳过。
+
+  装完系统后，第一步是更新源，官方的源下载太慢，更新步骤如下：
+  1、以root身份打开 /etc/apt/sources.list ，至于用什么打开随意
+  2、将“http://ports.ubuntu.com/”全部替换为
+  “https://mirrors.ustc.edu.cn/ubuntu-ports/”，这是中科大的
+  3、执行 sudo apt-get update 和 sudo apt-get upgrade 测试
+  注意：这里选择的源要支持arm，打开一个镜像站点，然后以此打开 /dists/xenial/main/ ，看这个目录下面有没有 binary-arm 这样的字眼，如果有，就是提供arm支持的。
+
+3、之后卸载Python2.7，因为原装系统上装有两个版本，而2.7版本即将不再支持，所以我将默认版本设为了3.6.5版本。(后来发现mate桌面依赖于python2.7，卸载不得呀)
+sudo apt-get autoremove python2.7
+rm -rf /usr/bin/python
+sudo ln -s /usr/bin/python3.6 /usr/bin/python
+
+4、接下来就是安装pip了，并升级到最新版本
+sudo apt install python3-venv python3-pip
+pip install --upgrade pip
+sudo apt -y install liblapack-dev libatlas-base-dev libjasper-dev libilmbase-dev libopenexr-dev libgstreamer1.0-dev libgstreamer1.0-dev libqt4-dev
+
+-----------------------------------------------------------------------未完待续
+
+
+搭建过程中遇到的不少问题：
+
+1、ubuntu 18.04在更新软件库时出现E: Release file for http://security.ubuntu.com/ubuntu/dists/bionic-security/InRelease is not valid yet
+出现这个问题的原因是时区不对
+解决办法：
+同步时间 sudo ntpdate cn.pool.ntp.org，或者等待联网稳定后自动同步
+
+2、在系统升级过程中出现dpkg：处理归/var/cache/apt/archives/xxxxxx(--unpack)错误
+
+问题原因是试图覆盖的地方已经被覆盖了，可以执行以下命令
+sudo dpkg -i --force-overwrite <filename>
+sudo apt-get -f install
+
+3、在升级pip后出现Import Error:cannot import name main
+原因是将pip更新为10.0.0后库里面的函数有所变动造成这个问题。
+解决方法如下：
+sudo vi /usr/bin/pip
+将原来的  from pip import main
+改为  from pip._internal import main
+
+方法二：
+sudo vi /usr/bin/pip
+将原来的：
+from pip import main
+if __name == ‘__main__’:
+	sys.exit(main())
+改为
+from pip import main
+if __name == ‘__main__’:
+	sys.exit(__main__._main())
+
+
+4、在ubuntu中遇到could not get lock /var/lib/dpkg/lock
+问题原因：主要是因为apt还在运行。
+解决方案：杀死所有的apt进程。
+1：查找所有apt相关的进程 
+ps afx|grep apt
+2、用命令杀死。
+sudo kill -9 xxxx
