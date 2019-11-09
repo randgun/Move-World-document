@@ -1,0 +1,179 @@
+                                                   在Ubuntu上试跑激光数据集
+
+具体步骤：
+1、安装Karto
+因为slam_karto是依赖于open_karto的,所以要先安装open_karto.有两种方式安装karto_slam,推荐使用第二种方式，这样后续学习修改源代码会方便一点.
+
+第一种:
+sudo apt-get install ros-kinetic-open-karto
+sudo apt-get install ros-kinetic-slam-karto
+注意kinetic为你ros对应的版本. 
+
+
+第二种:
+cd catkin_ws/src
+git clone https://github.com/ros-perception/open_karto.git
+git clone https://github.com/ros-perception/slam_karto.git
+cd ..
+catkin_make
+
+catkin_make没有报错的话,基本上就安装成功了.可以尝试运行,但在运行之前别忘记执行下source devel/setup.bash也可以一劳永逸,在home下的.bashrc末尾追加
+加“source /home/yourusername/catkin_ws/devel/setup.bash”
+
+分两个Terminal运行:
+1、roscore
+2、rosrun slam_karto slam_karto
+
+2.下载数据集
+http://ais.informatik.uni-freiburg.de/slamevaluation/datasets.php
+
+下载说明:
+进去网站后点你想下载的对应的”download log file”
+然后你可能会看到变成页面一堆数据
+ctrl+a
+ctrl+c
+新建一个文档如data.clf,存之.注意是.clf.
+
+3.处理数据集
+这个.clf不是我们用的,需要把它转化为特定格式的.bag文件,然后rosbag play来使用数据集, 
+下面给出转化用的python代码. 
+
+#!/usr/bin/env python
+#coding=utf8
+
+'''This is a converter for the Intel Research Lab SLAM dataset
+   ( http://kaspar.informatik.uni-freiburg.de/~slamEvaluation/datasets/intel.clf )
+   to rosbag'''
+
+import rospy
+import rosbag
+from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import Odometry
+from math import pi
+from tf2_msgs.msg import TFMessage
+from geometry_msgs.msg import TransformStamped
+import tf
+import sys
+
+def make_tf_msg(x, y, theta, t,base,base0):
+    trans = TransformStamped()
+    trans.header.stamp = t
+    trans.header.frame_id = base
+    trans.child_frame_id = base0
+    trans.transform.translation.x = x
+    trans.transform.translation.y = y
+    q = tf.transformations.quaternion_from_euler(0, 0, theta)
+    trans.transform.rotation.x = q[0]
+    trans.transform.rotation.y = q[1]
+    trans.transform.rotation.z = q[2]
+    trans.transform.rotation.w = q[3]
+
+    msg = TFMessage()
+    msg.transforms.append(trans)
+    return msg
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print "请输入dataset文件名。" 
+        exit()
+    print "正在处理" + sys.argv[1] + "..."
+    with open(sys.argv[1]) as dataset:
+        with rosbag.Bag(sys.argv[2], 'w') as bag:
+            i = 1
+            for line in dataset.readlines():
+                line = line.strip()
+                tokens = line.split(' ')
+                if len(tokens) <= 2:
+                    continue
+                if tokens[0] == 'FLASER':
+                    msg = LaserScan()
+                    num_scans = int(tokens[1])
+
+                    if num_scans != 180 or len(tokens) < num_scans + 9:
+                        rospy.logwarn("unsupported scan format")
+                        continue
+
+                    msg.header.frame_id = 'base_laser_link'
+                    t = rospy.Time(float(tokens[(num_scans + 8)]))
+                    msg.header.stamp = t
+                    msg.header.seq = i
+                    i += 1
+                    msg.angle_min = -90.0 / 180.0 * pi
+                    msg.angle_max = 90.0 / 180.0 * pi
+                    msg.angle_increment = pi / num_scans
+                    msg.time_increment = 0.2 / 360.0
+                    msg.scan_time = 0.2
+                    msg.range_min = 0.001
+                    msg.range_max = 50.0
+                    msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]]
+                    msg.ranges.append(float(0))  #我修改了这
+
+                    bag.write('scan', msg, t)
+
+                    odom_x, odom_y, odom_theta = [float(r) for r in tokens[(num_scans + 2):(num_scans + 5)]]
+                    tf_msg = make_tf_msg(odom_x, odom_y, odom_theta, t,'odom','base_link')
+                    bag.write('tf', tf_msg, t)
+
+                elif tokens[0] == 'ODOM':
+                    odom_x, odom_y, odom_theta = [float(t) for t in tokens[1:4]]
+                    t = rospy.Time(float(tokens[7]))
+                    tf_msg = make_tf_msg(0, 0, 0, t,'base_link','base_laser_link')
+                    bag.write('tf', tf_msg, t)
+
+使用方法:
+在你slam_karto下创建一个script文件夹,与launch文件夹同级目录.
+把下面代码创建成一个.py文件如convert.py,然后放到script中.
+因为他要用到ros库所以必须保存到某个parkage的script中.
+cd这个script下,然后python convert.py path/data.clf path/data.bag 转化成功.
+
+4、最后
+roscore
+rosrun slam_karto slam_karto
+rosrun rviz rviz
+rosbag play data.bag
+
+
+学习记录：
+1、Linux的使用
+调整到root用户即可修改只读文件
+使用mkdir 命令来创建目录和子目录
+使用rm或者rmdir命令删除文件目录
+我们使用rm 【需要注意的是 我们不能直接使用rm 目录名来删除目录】
+-r 就是向下递归，不管有多少级目录，一并删除 -f 就是直接强行删除，不作任何提示的意思
+例如：rm -rf 目录名称
+我们也可以使用rmdir命令删除目录
+ 例如：rmdir 目录名称 。
+Linux给文件改名的命令是mv命令
+在Linux中，修改文件名称的命令是  mv 旧文件名 新文件名  例如我们将下图中的demo文件夹修改为demo1； 执行mv demo demo1 就可以了。
+这几个命令的使用方式都是vi 文件名或者是vim 文件名 或者是 touch 文件名。
+不同之处 在于vi或者vim命令创建的文件需要保存才会生效。而touch则会直接创建文件
+
+2、Ubuntu下搜索文件
+1.whereis filename
+　　特点:快速,但是是模糊查找,例如 找 #whereis mysql 它会把mysql,mysql.ini,mysql.*所在的目录都找出来.我一般的查找都用这条命令.
+2.find / -name filename
+　　特点:准确,但速度慢,消耗资源大,例如我想找到php.ini的准确位置,就需要用
+　　#find / -name php.ini
+
+3、查看系统中所有用户：grep bash /etc/passwd 或者：cat /etc/passwd | cut -f 1 -d:
+
+
+错误解决：
+1、ImportError: /root/anaconda2/bin/../lib/libstdc++.so.6: version `GLIBCXX_3.4
+	输入命令：conda install libgcc
+
+2、更新软件源出错 404 Not Found –Ubuntu删除PPA
+解决办法： 进入/etc/apt/sources.list.d/，发现更新时发生错误的源，删去即可。
+步骤
+cd  /etc/apt/sources.list.d/（转移到所在目录）
+ls（查看有哪些PPA）
+rm jonathonf-ubuntu-python-3_6-bionic.list (删除)
+之后更新 sudo apt-get update
+
+3、Ubuntu安装ROS时遇到的“由于没有公钥，无法验证签名”问题
+更新软件源出现错误：
+GPG 错误：http://mirrors.ustc.edu.cn/ros/ubuntu bionic InRelease: 由于没有公钥，无法验证下列签名： NO_PUBKEY F42ED6FBAB17C654
+解决方法：
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F42ED6FBAB17C654
+
+
+
