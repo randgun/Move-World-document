@@ -1,3 +1,4 @@
+2019.11.16
 [github]关于在仓库中创建文件的方法举例
 直接在文件名后加"\"，github会自动识别为文件夹，但注意不能创建一个空文件夹。
 
@@ -38,8 +39,7 @@ strcpy_s(A,strlen(B)+1,B)
 [C++]关于const的一些问题
 const int a; int const a; 这两个写法是等同的，表示a是一个int常量。
 const int *a; 表示a是一个指针，可以任意指向int常量或者int变量，它总
-是把它所指向的目标当作一个int常量。也可以写成int const*
-a;含义相同。
+是把它所指向的目标当作一个int常量。也可以写成int const*a;含义相同。
 int * const a; 表示a是一个指针常量，初始化的时候必须固定指向一个int变
 量，之后就不能再指向别的地方了。
 
@@ -47,3 +47,36 @@ int * const a; 表示a是一个指针常量，初始化的时候必须固定指�
 Eg:class A {private:int a,b,c;	public:void add(int x,int y);};
 A::A(const A& B){a+=B.x}
 至于不同类之间的私有成员访问，可采用声明友元函数等方式实现。
+
+2019.11.25
+[VS+Qt] Qt5.12.6安装与VS2017配置
+一、下载和安装Qt
+1、下载地址：https://download.qt.io/archive/qt/5.12/
+2、安装
+(1)下载完成后，双击安装包，等待一会后点击next
+(2)出现登陆页面，若有账号直接登陆，没有直接注册一个即可，然后点击skip
+(3)点击下一步
+(4)选择安装路径(注意路径中不要有中文，最好选择一个空文件夹)
+(5)选择安装的组件—-点开Qt5.12.6(需要根据自己的安装的VS版本选择),
+选择MSVC 2017 64-bit,其余默认，点下一步
+(6)接收协议，点击下一步
+(7)修改在开始菜单中显示的名称，然后点击下一步
+(8)点击安装
+(9)关闭安装程序
+二、vs2017关联Qt
+1、在vs2017中安装Qt插件
+菜单栏点击工具拓展和更新联机右上方搜索框搜索Qt找到Qt Visual 
+Stuido Tools点击下载等待下载完成下载完成后注意底部通知，点击关
+闭重新打开VS2017，弹出安装页面，点击修改Qt VS tools会自动安装，
+安装完成之后点击关闭
+2、重启VS2017，菜单栏点击Qt VS ToolsQt Optionsaddpath找到Qt 
+5.12.6的安装目录下的msvc2017_64,将其路径添加
+3、配置电脑的环境变量，首先在桌面我的电脑图标上右键单击属性高级
+系统设置环境变量path编辑新建将msvc2017_64下面的bin路径
+添加进去即可确定，退出
+
+[VS+Qt] VS+QT没有自动生成.ui对应的ui_XXXX.h头文件问题
+1、在qt安装包下-> qbase -> bin 目录下有对应的uic.exe用来生成 .ui对应的ui_XXXX.h头文件 
+所以 cmd进入bin目录，运行uic XXXX.ui ui_XXXX.h就可以生成，
+也可以添加路径进行指定 如： uic F:\DTS\trunk\src\send\mainwindow.ui F:\DTS\trunk\src\send\ui_mainwindow.h
+2、在VS下，右键 .ui文件 -> 编译，就会生成对应的ui_XXXX.h头文件
