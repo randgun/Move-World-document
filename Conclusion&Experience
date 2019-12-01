@@ -80,3 +80,65 @@ Stuido Tools点击下载等待下载完成下载完成后注意底部�
 所以 cmd进入bin目录，运行uic XXXX.ui ui_XXXX.h就可以生成，
 也可以添加路径进行指定 如： uic F:\DTS\trunk\src\send\mainwindow.ui F:\DTS\trunk\src\send\ui_mainwindow.h
 2、在VS下，右键 .ui文件 -> 编译，就会生成对应的ui_XXXX.h头文件
+
+2019.12.1
+[Qt] 信号槽要求信号和槽的参数一致，所谓一致，是参数类型一致。如果不一致，
+允许的情况是，槽函数的参数可以比信号的少，即便如此，槽函数存在的那些参数
+的顺序也必须和信号的前面几个一致起来。这是因为，你可以在槽函数中选择忽略
+信号传来的数据（也就是槽函数的参数比信号的少），但是不能说信号根本没有这
+个数据，你就要在槽函数中使用（就是槽函数的参数比信号的多，这是不允许的）。
+
+[Qt] qDebug用于在控制台输出调试信息，主要有以下几种用法
+1、类似c++的cout函数  qDebug()<<”Hello”<<endl;
+2、构造函数直接引入参数
+qDebug("hello "+str);
+qDebug("今年我%d",year);
+[Qt]Q_OBJECT宏的作用
+只有继承了QObject类的类，才具有信号槽的能力。所以，为了使用信号槽，必须继承
+QObject。凡是QObject类（不管是直接子类还是间接子类），都应该在第一行代码写上
+Q_OBJECT。不管是不是使用信号槽，都应该添加这个宏。这个宏的展开将为我们的类提
+供信号槽机制、国际化机制以及 Qt 提供的不基于 C++ RTTI 的反射能力。因此，如果
+你觉得你的类不需要使用信号槽，就不添加这个宏，就是错误的。其它很多操作都会依
+赖于这个宏。
+注意，由于 moc 只处理头文件中的标记了Q_OBJECT的类声明，不会处理 cpp 文件中
+的类似声明。因此，如果我们的类位于 main.cpp 中，是无法得到 moc 的处理的。解
+决方法是，我们手动调用 moc 工具处理 main.cpp，并且将 main.cpp 中的#include 
+“xxx.h”改为#include “moc_xxx.h”就可以了。不过，这是相当繁琐的步骤，为了
+避免这样修改，我们还是将其放在头文件中。许多初学者会遇到莫名其妙的错误，一加
+上Q_OBJECT就出错，很大一部分是因为没有注意到这个宏应该放在头文件中。
+
+[Qt]emit解惑
+直接看它的定义：#define emit
+也就是说emit仅仅是个宏定义符号，编译器宏替换后就是个“空白”，根本就不会编
+译它。代码里完全可以去掉这个符号，反之你也可以在任何代码前加上这个符号，如这行代码emit reurn; 编译的时候不会有任何错误。
+所以下面的发射信号语句，从c++语法上讲就是调用xxx(...)函数
+emit xxx（ ... ）;上面代码和只写： xxx(...); 编译结果是一样的。
+为什么要定义这个符号呢？可能是为了让编程者知道这个定义要发射信号了，其实是用
+于MOC处理的。
+
+[Qt] 自定义信号槽需要注意的事项
+1、发送者和接收者都需要是QObject的子类（当然，槽函数是全局函数、Lambda 表达
+式等无需接收者的时候除外）； 
+2、使用 signals 标记信号函数，信号是一个函数声明，返回 void，不需要实现函数
+代码； 
+3、槽函数是普通的成员函数，作为成员函数，会受到 public、private、protected 的
+影响； 
+4、使用 emit 在恰当的位置发送信号； 
+5、使用QObject::connect()函数连接信号和槽
+
+[Qt+VS2017]在用VS调试Qt代码时获取qDebug()信息的方法
+1、#include <qdebug.h>
+2、.pro文件添加CONFIG += console
+2、选中当前项目，右键选择属性(properties)链接器(Linker)系统(system)子
+系统中选择控制台console(set SubSystem to "SUBSYSTEM:CONSOLE")
+
+[Qt] QWidget类是所有用户界面对象的基类。
+QWidget继承自QObject类和QPaintDevice类。QObject是所有支持Qt对象模型的对
+象的基类，QPaintDevice类是所有可以绘制的对象的基类。
+几乎所有的部件都继承自QWidget。从理论上来讲，任何继承自QWidget的类的派生类
+的实例，都可以作为中心窗口部件使用。
+详见图片：https://s2.ax1x.com/2019/12/01/QmtCjS.png
+
+[Qt]显示中文乱码解决方法之一：使用宏QStringLiteral，其作用是从“字符串常量”创建QString对象的宏
+Eg:QPushButton *pushbutton = new QPushButton(&w);
+pushbutton->setText(QStringLiteral("退出"));
