@@ -1,0 +1,29 @@
+类 概述
+LaserRangeFinder
+该类管理关于 laser的相关信息，包括:
+
+laser名字 : 在tutorial1中为 laser0
+laser的扫描范围:最大角度，最小角度等等
+laser与车中心之间的相对关系 : SetOffsetPose()实现，tutorial1中为karto::Pose2(1.0, 0.0, 0.0)，意为laser相对于车的坐标为 (1,0)，同时相对车的转向角（karto称之为Heading）为 0,
+laser 的分辨率，每两根laser射线之间的夹角，配合laser的范围，可以确定laser的射线数量laser 的分辨率，每两根laser射线之间的夹角，配合laser的范围，可以确定laser的射线数量
+laser 的 RangeThreshold，用于栅格的大小。
+LaserRangeScan
+kt_double* m_pRangeReadings 从laser读取的原始数据
+kt_int32u m_NumberOfRangeReadings laser射线数量
+提供一些获取数据以及获取数据来源(即来自于 laser0)的方法
+LocalizedRangeScan : public LaserRangeScan
+PointVectorDouble m_PointReadings 将laser的扫描数据转换为 在世界坐标系中的二维坐标结果，在Update()函数中实现
+BoundingBox2 m_BoundingBox 将laser扫描数据在世界坐标系中的结果用boundingbox圈起来
+Pose2 m_OdometricPose 机器人的里程计结果，不是准确的结果，需要优化，注意不是laser位姿
+Pose2 m_CorrectedPose 通过karto算法纠正后的机器人的位姿，注意不是laser位姿
+Pose2 m_BarycenterPose 将 m_PointReadings的每一个点强行加起来算出的平均点位置
+Update() 将上述变量进行赋值的函数
+void SetSensorPose(const Pose2& rScanPose) 将karto算法得到的结果赋值的函数，较为复杂，可以看文中开头的代码网址中的详细介绍
+ScanMatcher
+Mapper* m_pMapper 地图，见下面的地图释义
+CorrelationGrid* m_pCorrelationGrid 栅格地图，用于MatchScan函数计算response
+Grid<kt_double>* m_pSearchSpaceProbs 不太懂
+GridIndexLookup<kt_int8u>* m_pGridLookup 用来存储经过不同旋转之后的nPoints个扫描点应该落在的位置上面
+
+
+
