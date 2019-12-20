@@ -1,0 +1,43 @@
+Mapper
+非常重要的类，管理了整个karto算法大部分内容
+变量
+
+ScanMatcher* m_pSequentialScanMatcher 将上面的ScanMatcher类存储到 Mapper之中，主要发挥计算runningScans和当前scan数据之间的里程计的作用
+MapperSensorManager* m_pMapperSensorManager 这个也是非常重要的内容。用于管理历史 laserScans以及runningScans，其中runningScans是用来做匹配的
+MapperGraph* m_pGraph
+ScanSolver* m_pScanOptimizer 在karto算法中为SPA，一种类似于g2o的优化算法
+Parameter<kt_bool>* m_pUseScanMatching 众多预设参数的一个
+
+函数方法
+
+Mapper::Initialize(kt_double rangeThreshold) 初始化了Mapper类内的各种重要变量，如ScanMatcher* m_pSequentialScanMatcher， MapperSensorManager* m_pMapperSensorManager等
+
+kt_bool Mapper::Process(LocalizedRangeScan* pScan) 每获取一帧新数据，就要进行karto算法处理。这个相当于Mapper的主函数
+
+kt_bool Mapper::HasMovedEnough(LocalizedRangeScan* pScan, LocalizedRangeScan* pLastScan) 判断当前帧是否可以进行karto算法，通过两帧之间的距离以及时间来判断
+
+void Mapper::FireInfo(const std::string& rInfo) const 用于输出一些信息的函数，其他Fire函数也是这样
+
+inline kt_bool TryCloseLoop(LocalizedRangeScan* pScan, const Name& rSensorName) 试图找回环的函数，具体解释见文章开头代码地址里面的详细解释
+
+
+MapperGraph
+Mapper* m_pMapper 与Mapper属于相互引用的关系，地址一样，所以功能一样
+
+ScanMatcher* m_pLoopScanMatcher
+
+GraphTraversal<LocalizedRangeScan>* m_pTraversal 利用深度优先算法(BFS)来搜索当前帧的邻近帧的算法
+
+void AddVertex(LocalizedRangeScan* pScan) 图优化中顶点
+
+Edge<LocalizedRangeScan>* AddEdge(LocalizedRangeScan* pSourceScan, LocalizedRangeScan* pTargetScan, kt_bool& rIsNewEdge) 图优化中边的概念
+
+FindNearLinkedScans(LocalizedRangeScan* pScan, kt_double maxDistance) 利用深度优先算法搜索相邻的帧
+
+LocalizedRangeScanVector FindPossibleLoopClosure(LocalizedRangeScan* pScan, const Name& rSensorName, kt_int32u& rStartNum)
+找回环的一部分代码
+
+Mapper.h类：
+
+
+Mapper scanMatcher MapperGraph关系图：
